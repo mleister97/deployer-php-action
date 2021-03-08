@@ -53,7 +53,7 @@ module.exports =
 
 const path = __webpack_require__(622);
 const which = __webpack_require__(55);
-const pathKey = __webpack_require__(39)();
+const pathKey = __webpack_require__(565)();
 
 function resolveCommandAttempt(parsed, withoutPathExt) {
     const cwd = process.cwd();
@@ -627,30 +627,6 @@ Promise.spawn = function (generatorFunction) {
 
 /***/ }),
 
-/***/ 39:
-/***/ (function(module) {
-
-"use strict";
-
-
-const pathKey = (options = {}) => {
-	const environment = options.env || process.env;
-	const platform = options.platform || process.platform;
-
-	if (platform !== 'win32') {
-		return 'PATH';
-	}
-
-	return Object.keys(environment).reverse().find(key => key.toUpperCase() === 'PATH') || 'Path';
-};
-
-module.exports = pathKey;
-// TODO: Remove this for the next major release
-module.exports.default = pathKey;
-
-
-/***/ }),
-
 /***/ 40:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -1149,21 +1125,6 @@ module.exports = require("os");
 
 /***/ }),
 
-/***/ 90:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-const ansiRegex = __webpack_require__(436);
-
-const stripAnsi = string => typeof string === 'string' ? string.replace(ansiRegex(), '') : string;
-
-module.exports = stripAnsi;
-module.exports.default = stripAnsi;
-
-
-/***/ }),
-
 /***/ 102:
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -1299,7 +1260,7 @@ module.exports.MaxBufferError = MaxBufferError;
 
 
 const readline = __webpack_require__(58);
-const stripAnsi = __webpack_require__(90);
+const stripAnsi = __webpack_require__(867);
 const { dashes, dots } = __webpack_require__(823);
 
 const VALID_STATUSES = ['succeed', 'fail', 'spinning', 'non-spinnable', 'stopped'];
@@ -3964,7 +3925,6 @@ const tasks = new taskz([
         text: 'Install Deployer',
         task: () => SetupDeployer_1.default({
             deployerVersion: core.getInput('deployer-version'),
-            deployerRecipesVersion: core.getInput('deployer-recipes-version'),
             skipDeployerInstall: core.getInput('deployer-skip-install'),
         })
     },
@@ -4424,7 +4384,26 @@ function escapeProperty(s) {
 
 /***/ }),
 
-/***/ 436:
+/***/ 440:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+var old;
+if (typeof Promise !== "undefined") old = Promise;
+function noConflict() {
+    try { if (Promise === bluebird) Promise = old; }
+    catch (e) {}
+    return bluebird;
+}
+var bluebird = __webpack_require__(983)();
+bluebird.noConflict = noConflict;
+module.exports = bluebird;
+
+
+/***/ }),
+
+/***/ 446:
 /***/ (function(module) {
 
 "use strict";
@@ -4442,25 +4421,6 @@ module.exports = options => {
 
 	return new RegExp(pattern, options.onlyFirst ? undefined : 'g');
 };
-
-
-/***/ }),
-
-/***/ 440:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-var old;
-if (typeof Promise !== "undefined") old = Promise;
-function noConflict() {
-    try { if (Promise === bluebird) Promise = old; }
-    catch (e) {}
-    return bluebird;
-}
-var bluebird = __webpack_require__(983)();
-bluebird.noConflict = noConflict;
-module.exports = bluebird;
 
 
 /***/ }),
@@ -5694,6 +5654,30 @@ exports.toggle = (force, writableStream) => {
 		exports.hide(writableStream);
 	}
 };
+
+
+/***/ }),
+
+/***/ 565:
+/***/ (function(module) {
+
+"use strict";
+
+
+const pathKey = (options = {}) => {
+	const environment = options.env || process.env;
+	const platform = options.platform || process.platform;
+
+	if (platform !== 'win32') {
+		return 'PATH';
+	}
+
+	return Object.keys(environment).reverse().find(key => key.toUpperCase() === 'PATH') || 'Path';
+};
+
+module.exports = pathKey;
+// TODO: Remove this for the next major release
+module.exports.default = pathKey;
 
 
 /***/ }),
@@ -6951,7 +6935,7 @@ module.exports = require("events");
 "use strict";
 
 const path = __webpack_require__(622);
-const pathKey = __webpack_require__(39);
+const pathKey = __webpack_require__(682);
 
 const npmRunPath = options => {
 	options = {
@@ -7256,6 +7240,30 @@ function nodebackForPromise(promise, multiArgs) {
 }
 
 module.exports = nodebackForPromise;
+
+
+/***/ }),
+
+/***/ 682:
+/***/ (function(module) {
+
+"use strict";
+
+
+const pathKey = (options = {}) => {
+	const environment = options.env || process.env;
+	const platform = options.platform || process.platform;
+
+	if (platform !== 'win32') {
+		return 'PATH';
+	}
+
+	return Object.keys(environment).reverse().find(key => key.toUpperCase() === 'PATH') || 'Path';
+};
+
+module.exports = pathKey;
+// TODO: Remove this for the next major release
+module.exports.default = pathKey;
 
 
 /***/ }),
@@ -7966,10 +7974,7 @@ exports.default = async (options) => {
     const deployerPackage = options.deployerVersion
         ? `deployer/deployer:${options.deployerVersion}`
         : 'deployer/deployer';
-    const deployerRecipesPackage = options.deployerRecipesVersion
-        ? `deployer/recipes:${options.deployerRecipesVersion}`
-        : 'deployer/recipes';
-    await execa('composer', ['global', 'require', deployerPackage, deployerRecipesPackage]);
+    await execa('composer', ['global', 'require', deployerPackage]);
     const installPath = (await execa('composer', ['global', 'config', 'home'])).stdout;
     core.addPath(`${installPath}/vendor/bin`);
 };
@@ -8376,14 +8381,31 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const execa = __webpack_require__(955);
 const core = __webpack_require__(470);
 const promise = __webpack_require__(440);
+const os = __webpack_require__(87);
 const fs = promise.promisifyAll(__webpack_require__(747));
+const fileIncludesString = async (fileName, content) => {
+    return new Promise((resolve, reject) => {
+        fs.readFile(fileName, function (err, fileData) {
+            if (err)
+                return resolve(false);
+            else if (fileData.includes(content))
+                return resolve(true);
+            else
+                return resolve(false);
+        });
+    });
+};
 exports.default = async (options) => {
     const home = process.env['HOME'];
     const sshHome = home + '/.ssh';
     fs.mkdirAsync(sshHome, { recursive: true });
     const authSock = '/tmp/ssh-auth.sock';
-    await execa('ssh-agent', ['-a', authSock]);
     core.exportVariable('SSH_AUTH_SOCK', authSock);
+    if (fs.existsSync(authSock)) {
+        core.info('Skipping SSH agent setup as agent is already running.');
+        return;
+    }
+    await execa('ssh-agent', ['-a', authSock]);
     // Fix private key line endings
     const privateKey = options.privateKey.replace('/\r/g', '').trim() + '\n';
     await execa('ssh-add', ['-'], { input: privateKey });
@@ -8391,8 +8413,12 @@ exports.default = async (options) => {
         await fs.appendFileAsync(`/etc/ssh/ssh_config`, `StrictHostKeyChecking no`);
         return;
     }
-    await fs.appendFileAsync(`${sshHome}/known_hosts`, options.knownHosts);
-    await fs.chmodAsync(`${sshHome}/known_hosts`, '644');
+    const knownHostsFileLocation = `${sshHome}/known_hosts`;
+    const isHostAlreadyAppended = await fileIncludesString(knownHostsFileLocation, options.knownHosts);
+    if (!isHostAlreadyAppended) {
+        await fs.appendFileAsync(knownHostsFileLocation, os.EOL + options.knownHosts);
+        await fs.chmodAsync(knownHostsFileLocation, '644');
+    }
 };
 
 
@@ -9181,6 +9207,21 @@ module.exports = (chalk, tmp) => {
 
 	return chunks.join('');
 };
+
+
+/***/ }),
+
+/***/ 867:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const ansiRegex = __webpack_require__(446);
+
+const stripAnsi = string => typeof string === 'string' ? string.replace(ansiRegex(), '') : string;
+
+module.exports = stripAnsi;
+module.exports.default = stripAnsi;
 
 
 /***/ }),
